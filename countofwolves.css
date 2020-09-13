@@ -6,6 +6,11 @@
  * tutorial.
  */
 
+ @font-face {
+  font-family: "digital-7 (mono)";
+  src: url("/fonts/digital-7 (mono).ttf") format("truetype");
+}
+
 body{
 	text-align: center;
 	background: #00ECB9;
@@ -21,7 +26,7 @@ h1{
 }
 
 #clockdiv{
-	font-family: sans-serif;
+	font-family: "digital-7 (mono)";
 	color: #fff;
 	display: inline-block;
 	font-weight: 100;
