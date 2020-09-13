@@ -1,0 +1,24 @@
+{
+	"esversion": 6,
+	"browser": true,
+
+	// Let's make our linter really strict
+	"curly": true,
+	"eqeqeq": true,
+	"forin": true,
+	"freeze": true,
+	"futurehostile": true,
+	"latedef": true,
+	"leanswitch": true,
+	"noarg": true,
+	"nocomma": true,
+	"nonbsp": true,
+	"nonew": true,
+	"regexpu": true,
+	"singleGroups": true,
+	"strict": true,
+	"trailingcomma": true,
+	"undef": true,
+	"unused": "strict",
+	"varstmt": true
+}
