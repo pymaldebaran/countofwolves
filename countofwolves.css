@@ -11,6 +11,14 @@
   src: url("fonts/digital-7 (mono).ttf") format("truetype");
 }
 
+:root{
+	--counter-font-size: 300px;
+	--debug-font-size: 80px;
+	--counter-fg-color: red;
+	--counter-bg-color: rgb(13% 13% 13%);
+	--counter-shadow: 0 0 0.05em red, 0 0 0.1em rgba(100% 100% 0%);
+}
+
 body{
 	text-align: center;
 	background: black;
@@ -28,7 +36,7 @@ h1{
 #counter{
 	font-weight: 100;
 	text-align: center;
-	font-size: 300px;
+	font-size: var(--counter-font-size);
 	margin: 10%;
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -36,13 +44,14 @@ h1{
 }
 
 #counter .fg{
-	color: red;
+	color: var(--counter-fg-color);
+	text-shadow: var(--counter-shadow);
 	background: transparent;
 	z-index: 1;
 }
 
 #counter .bg{
-	color: rgb(13% 13% 13%);
+	color: var(--counter-bg-color);
 	z-index: 0;
 }
 
@@ -75,12 +84,13 @@ h1{
 }
 
 #counter .total-label{
-	color: red;
-	font-size: 80px;
+	color: var(--counter-fg-color);
+	text-shadow: var(--counter-shadow);
+	font-size: var(--debug-font-size);
 	grid-area: 2 / 1 / span 1 / span 2;
 }
 
 #counter .total{
-	font-size: 80px;
+	font-size: var(--debug-font-size);
 	grid-area: 2 / 3 / span 1 / span 2;
 }
