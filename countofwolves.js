@@ -15,8 +15,9 @@
 	const MIN_IN_HOUR = 60;
 	const HOUR_IN_DAY = 24;
 
-	const UPDATE_INTERVAL = 33;
-	const ROOT_CLOCK_ID = 'counter';
+	const UPDATE_INTERVAL_MS = 33; // in ms
+	const ROOT_CLOCK_ID = 'round-time';
+	const ROUND_DURATION_MIN = 30; // in min
 
 	function getTimeRemaining(endtime) {
 	  const total = Date.parse(endtime) - Date.now();
@@ -39,7 +40,6 @@
 	// This function can inly be called once the page is loaded so the script must be loaded with defer attribute
 	function initializeClock(id, endtime) {
 	  const clock = document.getElementById(id);
-	  const hoursDiv = clock.querySelector('.hours');
 	  const minutesDiv = clock.querySelector('.minutes');
 	  const secondsDiv = clock.querySelector('.seconds');
 	  const centisecondsDiv = clock.querySelector('.centiseconds');
@@ -50,11 +50,10 @@
 	  function updateClock() {
 			const t = getTimeRemaining(endtime);
 
-			hoursDiv.innerHTML = ('0' + t.hours).slice(-2);
 			minutesDiv.innerHTML = ('0' + t.minutes).slice(-2);
 			secondsDiv.innerHTML = ('0' + t.seconds).slice(-2);
 			centisecondsDiv.innerHTML = ('0' + t.centiseconds).slice(-2);
-			totalDiv.innerHTML = t.total;
+			totalDiv.innerHTML = ('0000000' + t.total).slice(-8);
 
 			if (t.total <= 0 && timeIntervalID) {
 			  clearInterval(timeIntervalID);
@@ -62,9 +61,9 @@
 	  }
 
 	  updateClock();
-	  timeIntervalID = setInterval(updateClock, UPDATE_INTERVAL);
+	  timeIntervalID = setInterval(updateClock, UPDATE_INTERVAL_MS);
 	}
 
-	const deadline = new Date(Date.now() + 15 * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC);
+	const deadline = new Date(Date.now() + ROUND_DURATION_MIN * SEC_IN_MIN * MS_IN_SEC);
 	initializeClock(ROOT_CLOCK_ID, deadline);
 })();
