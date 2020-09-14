@@ -16,6 +16,7 @@
 	const HOUR_IN_DAY = 24;
 
 	const UPDATE_INTERVAL = 33;
+	const ROOT_CLOCK_ID = 'counter';
 
 	function getTimeRemaining(endtime) {
 	  const total = Date.parse(endtime) - Date.now();
@@ -38,22 +39,22 @@
 	// This function can inly be called once the page is loaded so the script must be loaded with defer attribute
 	function initializeClock(id, endtime) {
 	  const clock = document.getElementById(id);
-	  const hoursSpan = clock.querySelector('.hours');
-	  const minutesSpan = clock.querySelector('.minutes');
-	  const secondsSpan = clock.querySelector('.seconds');
-	  const centisecondsSpan = clock.querySelector('.centiseconds');
-	  const totalSpan = clock.querySelector('.total');
+	  const hoursDiv = clock.querySelector('.hours');
+	  const minutesDiv = clock.querySelector('.minutes');
+	  const secondsDiv = clock.querySelector('.seconds');
+	  const centisecondsDiv = clock.querySelector('.centiseconds');
+	  const totalDiv = clock.querySelector('.total');
 
 	  let timeIntervalID = null; // will be defined later
 
 	  function updateClock() {
 			const t = getTimeRemaining(endtime);
 
-			hoursSpan.innerHTML = ('0' + t.hours).slice(-2);
-			minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
-			secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
-			centisecondsSpan.innerHTML = ('0' + t.centiseconds).slice(-2);
-			totalSpan.innerHTML = t.total;
+			hoursDiv.innerHTML = ('0' + t.hours).slice(-2);
+			minutesDiv.innerHTML = ('0' + t.minutes).slice(-2);
+			secondsDiv.innerHTML = ('0' + t.seconds).slice(-2);
+			centisecondsDiv.innerHTML = ('0' + t.centiseconds).slice(-2);
+			totalDiv.innerHTML = t.total;
 
 			if (t.total <= 0 && timeIntervalID) {
 			  clearInterval(timeIntervalID);
@@ -65,5 +66,5 @@
 	}
 
 	const deadline = new Date(Date.now() + 15 * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC);
-	initializeClock('clockdiv', deadline);
+	initializeClock(ROOT_CLOCK_ID, deadline);
 })();

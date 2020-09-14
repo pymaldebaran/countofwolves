@@ -8,13 +8,13 @@
 
  @font-face {
   font-family: "digital-7 (mono)";
-  src: url("/fonts/digital-7 (mono).ttf") format("truetype");
+  src: url("fonts/digital-7 (mono).ttf") format("truetype");
 }
 
 body{
 	text-align: center;
-	background: #00ECB9;
-	font-family: sans-serif;
+	background: black;
+	font-family: "digital-7 (mono)";
 	font-weight: 100;
 }
 
@@ -25,30 +25,62 @@ h1{
 	margin: 40px 0px 20px;
 }
 
-#clockdiv{
-	font-family: "digital-7 (mono)";
-	color: #fff;
-	display: inline-block;
+#counter{
 	font-weight: 100;
 	text-align: center;
-	font-size: 30px;
+	font-size: 300px;
+	margin: 10%;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr 1fr;
+	grid-row-gap: 20%;
 }
 
-#clockdiv > div{
-	padding: 10px;
-	border-radius: 3px;
-	background: #00BF96;
-	display: inline-block;
+#counter .fg{
+	color: red;
+	background: transparent;
+	z-index: 1;
 }
 
-#clockdiv div > span{
-	padding: 15px;
-	border-radius: 3px;
-	background: #00816A;
-	display: inline-block;
+#counter .bg{
+	color: rgb(13% 13% 13%);
+	z-index: 0;
 }
 
-.smalltext{
-	padding-top: 5px;
-	font-size: 16px;
+#counter .hours{
+	grid-column-start: 1;
+	grid-column-end: 2;
+	grid-row-start: 1;
+	grid-row-end: 2;
+}
+
+#counter .minutes{
+	grid-column-start: 2;
+	grid-column-end: 3;
+	grid-row-start: 1;
+	grid-row-end: 2;
+}
+
+#counter .seconds{
+	grid-column-start: 3;
+	grid-column-end: 4;
+	grid-row-start: 1;
+	grid-row-end: 2;
+}
+
+#counter .centiseconds{
+	grid-column-start: 4;
+	grid-column-end: 5;
+	grid-row-start: 1;
+	grid-row-end: 2;
+}
+
+#counter .total-label{
+	color: red;
+	font-size: 80px;
+	grid-area: 2 / 1 / span 1 / span 2;
+}
+
+#counter .total{
+	font-size: 80px;
+	grid-area: 2 / 3 / span 1 / span 2;
 }
