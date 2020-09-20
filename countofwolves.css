@@ -4,6 +4,9 @@
  * This code is based on the
  * [Build a Countdown Timer in Just 18 Lines of JavaScript](https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/)
  * tutorial.
+ *
+ * Neon effect is based on the wonderful [Inkscape Tutorial: Neon Text Effect](https://youtu.be/fE-gKcJC8M8)
+ * from [Logos By Nick](https://logosbynick.com/). You HAVE TO WATCH it!
  */
 
  @font-face {
@@ -163,7 +166,8 @@ h1{
 .orange .neon-z3{
 	z-index: 3;
 	color: var(--neon-orange-z3);
-		text-shadow:
+	/* Hack to have a wannabe outline... see: https://css-tricks.com/adding-stroke-to-web-text/#simulation; */
+	text-shadow:
 		-8px -8px 0 var(--neon-orange-z3),
 		 8px  8px 0 var(--neon-orange-z3),
 		-8px  8px 0 var(--neon-orange-z3),
@@ -179,6 +183,7 @@ h1{
 .orange .neon-z2{
 	z-index: 2;
 	color: var(--neon-orange-z2);
+	/* Hack to have a wannabe outline... see: https://css-tricks.com/adding-stroke-to-web-text/#simulation; */
 	text-shadow:
 		-13px -13px 0 var(--neon-orange-z2),
 		 13px  13px 0 var(--neon-orange-z2),
@@ -195,6 +200,7 @@ h1{
 .orange .neon-z1{
 	z-index: 1;
 	color: var(--neon-orange-z1);
+	/* Hack to have a wannabe outline... see: https://css-tricks.com/adding-stroke-to-web-text/#simulation; */
 	text-shadow:
 		-20px -20px 0 var(--neon-orange-z1),
 		 20px  20px 0 var(--neon-orange-z1),
