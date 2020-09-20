@@ -18,8 +18,8 @@
 	const MIN_IN_HOUR = 60;
 	const HOUR_IN_DAY = 24;
 
-	const UPDATE_INTERVAL_MS = 33; // in ms
-	const ROOT_CLOCK_ID = 'round-time';
+	const UPDATE_INTERVAL_MS = 50; // in ms
+	const ROOT_CLOCK_SELECTOR = '.counter';
 	const ROUND_DURATION_MIN = 30; // in min
 
 	function getTimeRemaining(endtime) {
@@ -41,22 +41,37 @@
 	}
 
 	// This function can inly be called once the page is loaded so the script must be loaded with defer attribute
-	function initializeClock(id, endtime) {
-	  const clock = document.getElementById(id);
-	  const minutesDiv = clock.querySelector('.minutes');
-	  const secondsDiv = clock.querySelector('.seconds');
-	  const centisecondsDiv = clock.querySelector('.centiseconds');
-	  const totalDiv = clock.querySelector('.total');
+	function initializeClock(root_class, endtime) {
+	  const allClocks = document.querySelectorAll(root_class);
 
 	  let timeIntervalID = null; // will be defined later
 
 	  function updateClock() {
 			const t = getTimeRemaining(endtime);
 
-			minutesDiv.innerHTML = ('0' + t.minutes).slice(-2);
-			secondsDiv.innerHTML = ('0' + t.seconds).slice(-2);
-			centisecondsDiv.innerHTML = ('0' + t.centiseconds).slice(-2);
-			totalDiv.innerHTML = ('0000000' + t.total).slice(-8);
+			allClocks.forEach(clock => {
+		  	const minutesDivs = clock.querySelectorAll('.minutes.dynamic');
+			  const secondsDivs = clock.querySelectorAll('.seconds.dynamic');
+			  const centisecondsDivs = clock.querySelectorAll('.centiseconds.dynamic');
+			  const totalDivs = clock.querySelectorAll('.total');
+
+			  minutesDivs.forEach(div => div.innerHTML = ('0' + t.minutes).slice(-2));
+			  secondsDivs.forEach(div => div.innerHTML = ('0' + t.seconds).slice(-2));
+			  centisecondsDivs.forEach(div => div.innerHTML = ('0' + t.centiseconds).slice(-2));
+
+			  // if( minutesDiv && secondsDiv && centisecondsDiv ) {
+				 //  minutesDiv.innerHTML = ('0' + t.minutes).slice(-2);
+					// secondsDiv.innerHTML = ('0' + t.seconds).slice(-2);
+					// centisecondsDiv.innerHTML = ('0' + t.centiseconds).slice(-2);
+			  // }
+
+				totalDivs.forEach(div => div.innerHTML = ('0000000' + t.total).slice(-8));
+
+			  // if( totalDiv ) {
+					// totalDivs.innerHTML = ('0000000' + t.total).slice(-8);
+			  // }
+		  });
+
 
 			if (t.total <= 0 && timeIntervalID) {
 			  clearInterval(timeIntervalID);
@@ -68,5 +83,5 @@
 	}
 
 	const deadline = new Date(Date.now() + ROUND_DURATION_MIN * SEC_IN_MIN * MS_IN_SEC);
-	initializeClock(ROOT_CLOCK_ID, deadline);
+	initializeClock(ROOT_CLOCK_SELECTOR, deadline);
 })();
