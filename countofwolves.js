@@ -5,7 +5,10 @@
  * [Build a Countdown Timer in Just 18 Lines of JavaScript](https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/)
  * tutorial.
  */
-(() => { // Just a wrapper to prevent pollution of the global namespace
+
+// Just a wrapper to prevent pollution of the global namespace
+// http://benalman.com/news/2010/11/immediately-invoked-function-expression/
+(function(){
 	'use strict';
 
 	const MS_IN_SEC = 1000;
