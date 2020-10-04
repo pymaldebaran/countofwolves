@@ -40,40 +40,43 @@
 	  };
 	}
 
-	// This function can inly be called once the page is loaded so the script must be loaded with defer attribute
+	function getClockDivs(clock) {
+	  const total = clock.querySelectorAll('.total');
+		const minutes = clock.querySelectorAll('.minutes.dynamic');
+	  const seconds = clock.querySelectorAll('.seconds.dynamic');
+	  const centiseconds = clock.querySelectorAll('.centiseconds.dynamic');
+
+	  return {
+	  	total,
+	  	minutes,
+	  	seconds,
+	  	centiseconds,
+	  };
+	}
+
+	/**
+	 * This function can only be called once the page is loaded so the script must be loaded with defer attribute
+	 */
 	function initializeClock(root_class, endtime) {
+		// For debugging purpose we sometimes have many clocks...
 	  const allClocks = document.querySelectorAll(root_class);
 
 	  let timeIntervalID = null; // will be defined later
 
 	  function updateClock() {
-			const t = getTimeRemaining(endtime);
+			const remaining = getTimeRemaining(endtime);
 
 			allClocks.forEach(clock => {
-		  	const minutesDivs = clock.querySelectorAll('.minutes.dynamic');
-			  const secondsDivs = clock.querySelectorAll('.seconds.dynamic');
-			  const centisecondsDivs = clock.querySelectorAll('.centiseconds.dynamic');
-			  const totalDivs = clock.querySelectorAll('.total');
+				const divs = getClockDivs(clock);
 
-			  minutesDivs.forEach(div => div.innerHTML = ('0' + t.minutes).slice(-2));
-			  secondsDivs.forEach(div => div.innerHTML = ('0' + t.seconds).slice(-2));
-			  centisecondsDivs.forEach(div => div.innerHTML = ('0' + t.centiseconds).slice(-2));
-
-			  // if( minutesDiv && secondsDiv && centisecondsDiv ) {
-				 //  minutesDiv.innerHTML = ('0' + t.minutes).slice(-2);
-					// secondsDiv.innerHTML = ('0' + t.seconds).slice(-2);
-					// centisecondsDiv.innerHTML = ('0' + t.centiseconds).slice(-2);
-			  // }
-
-				totalDivs.forEach(div => div.innerHTML = ('0000000' + t.total).slice(-8));
-
-			  // if( totalDiv ) {
-					// totalDivs.innerHTML = ('0000000' + t.total).slice(-8);
-			  // }
+			  divs.minutes.forEach(div => div.innerHTML = ('0' + remaining.minutes).slice(-2));
+			  divs.seconds.forEach(div => div.innerHTML = ('0' + remaining.seconds).slice(-2));
+			  divs.centiseconds.forEach(div => div.innerHTML = ('0' + remaining.centiseconds).slice(-2));
+				divs.total.forEach(div => div.innerHTML = ('0000000' + remaining.total).slice(-8));
 		  });
 
-
-			if (t.total <= 0 && timeIntervalID) {
+			// If the countdown is over, we stop the update
+			if (remaining.total <= 0 && timeIntervalID) {
 			  clearInterval(timeIntervalID);
 			}
 	  }
