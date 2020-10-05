@@ -26,34 +26,63 @@
 
 	const UPDATE_INTERVAL_MS = 50; // in ms
 
-	const ROUND_DURATION_MIN = 1; // in min
+	const ROUND_DURATION_MIN = 0.1; // in min
 
-	function getTimeRemaining(endtime) {
-	  const total = Math.max(0, Date.parse(endtime) - Date.now());
-	  const centiseconds = Math.max(0, Math.floor(total / MS_IN_CS % CS_IN_SEC));
-	  const seconds = Math.max(0, Math.floor(total / MS_IN_SEC % SEC_IN_MIN));
-	  const minutes = Math.max(0, Math.floor(total / (MS_IN_SEC * SEC_IN_MIN) % MIN_IN_HOUR));
-	  const hours = Math.max(0, Math.floor(total / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR) % HOUR_IN_DAY));
-	  const days = Math.max(0, Math.floor(total / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR * HOUR_IN_DAY)));
+	// Remainig time is represented as an object
+	class TimeRemaining {
+		constructor(ms) {
+			this.ms = Math.max(0, ms);
+			this.lastUpdate = null;
+			this.paused = false;
+		}
 
-	  return {
-			total,
-			days,
-			hours,
-			minutes,
-			seconds,
-			centiseconds,
-	  };
+		get centiseconds() {
+			return Math.max(0, Math.floor(this.ms / MS_IN_CS % CS_IN_SEC));
+		}
+
+	  get seconds() {
+			return Math.max(0, Math.floor(this.ms / MS_IN_SEC % SEC_IN_MIN));
+		}
+
+	  get minutes() {
+			return Math.max(0, Math.floor(this.ms / (MS_IN_SEC * SEC_IN_MIN) % MIN_IN_HOUR));
+		}
+
+	  get hours() {
+			return Math.max(0, Math.floor(this.ms / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR) % HOUR_IN_DAY));
+		}
+
+	  get days() {
+			return Math.max(0, Math.floor(this.ms / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR * HOUR_IN_DAY)));
+		}
+
+		/*
+		 * Update the reùaining time since last update.
+		 */
+	  update() {
+	  	if (this.paused) {
+	  		return;
+	  	}
+
+	  	let now = Date.now();
+
+	  	this.ms -= this.lastUpdate ? now - this.lastUpdate : 0;
+	  	if (this.ms < 0) {
+	  		this.ms = 0;
+	  	}
+
+	  	this.lastUpdate = now;
+	  }
 	}
 
 	function getClockDivs() {
-	  const total = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${TOTAL_SELECTOR}`);
+	  const ms = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${TOTAL_SELECTOR}`);
 		const minutes = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${MINUTES_SELECTOR}`);
 	  const seconds = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${SECONDS_SELECTOR}`);
 	  const centiseconds = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${CENTISECONDS_SELECTOR}`);
 
 	  return {
-	  	total,
+	  	ms,
 	  	minutes,
 	  	seconds,
 	  	centiseconds,
@@ -63,26 +92,27 @@
 	/**
 	 * This function can only be called once the page is loaded so the script must be loaded with defer attribute
 	 */
-	function initializeClock(endtime) {
+	function initializeClock(duration) {
 	  let timeIntervalID = null; // will be defined later
+	  const remaining = new TimeRemaining(duration);
 
 	  function updateClock() {
-			const remaining = getTimeRemaining(endtime);
+			remaining.update();
 
 			const divs = getClockDivs();
 
 			const minutesStr = remaining.minutes.toString().padStart(2, '0');
 			const secondsStr = remaining.seconds.toString().padStart(2, '0');
 			const centisecondsStr = remaining.centiseconds.toString().padStart(2, '0');
-			const totalStr = remaining.total.toString().padStart(8, '0');
+			const totalStr = remaining.ms.toString().padStart(8, '0');
 
 		  divs.minutes.forEach(div => div.innerHTML = minutesStr);
 		  divs.seconds.forEach(div => div.innerHTML = secondsStr);
 		  divs.centiseconds.forEach(div => div.innerHTML = centisecondsStr);
-			divs.total.forEach(div => div.innerHTML = totalStr);
+			divs.ms.forEach(div => div.innerHTML = totalStr);
 
 			// If the countdown is over, we stop the update
-			if (remaining.total <= 0 && timeIntervalID) {
+			if (remaining.ms <= 0 && timeIntervalID) {
 				clearInterval(timeIntervalID);
 			}
 	  }
@@ -91,6 +121,5 @@
 	  timeIntervalID = setInterval(updateClock, UPDATE_INTERVAL_MS);
 	}
 
-	const deadline = new Date(Date.now() + ROUND_DURATION_MIN * SEC_IN_MIN * MS_IN_SEC);
-	initializeClock(deadline);
+	initializeClock(ROUND_DURATION_MIN * SEC_IN_MIN * MS_IN_SEC);
 })();
