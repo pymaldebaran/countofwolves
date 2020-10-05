@@ -26,15 +26,15 @@
 
 	const UPDATE_INTERVAL_MS = 50; // in ms
 
-	const ROUND_DURATION_MIN = 30; // in min
+	const ROUND_DURATION_MIN = 1; // in min
 
 	function getTimeRemaining(endtime) {
-	  const total = Date.parse(endtime) - Date.now();
-	  const centiseconds = Math.floor(total / MS_IN_CS % CS_IN_SEC);
-	  const seconds = Math.floor(total / MS_IN_SEC % SEC_IN_MIN);
-	  const minutes = Math.floor(total / (MS_IN_SEC * SEC_IN_MIN) % MIN_IN_HOUR);
-	  const hours = Math.floor(total / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR) % HOUR_IN_DAY);
-	  const days = Math.floor(total / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR * HOUR_IN_DAY));
+	  const total = Math.max(0, Date.parse(endtime) - Date.now());
+	  const centiseconds = Math.max(0, Math.floor(total / MS_IN_CS % CS_IN_SEC));
+	  const seconds = Math.max(0, Math.floor(total / MS_IN_SEC % SEC_IN_MIN));
+	  const minutes = Math.max(0, Math.floor(total / (MS_IN_SEC * SEC_IN_MIN) % MIN_IN_HOUR));
+	  const hours = Math.max(0, Math.floor(total / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR) % HOUR_IN_DAY));
+	  const days = Math.max(0, Math.floor(total / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR * HOUR_IN_DAY)));
 
 	  return {
 			total,
@@ -83,7 +83,7 @@
 
 			// If the countdown is over, we stop the update
 			if (remaining.total <= 0 && timeIntervalID) {
-			  clearInterval(timeIntervalID);
+				clearInterval(timeIntervalID);
 			}
 	  }
 
