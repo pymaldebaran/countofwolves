@@ -18,8 +18,14 @@
 	const MIN_IN_HOUR = 60;
 	const HOUR_IN_DAY = 24;
 
-	const UPDATE_INTERVAL_MS = 50; // in ms
 	const ROOT_CLOCK_SELECTOR = '.counter';
+	const TOTAL_SELECTOR = '.total';
+	const MINUTES_SELECTOR = '.minutes.dynamic';
+	const SECONDS_SELECTOR = '.seconds.dynamic';
+	const CENTISECONDS_SELECTOR = '.centiseconds.dynamic';
+
+	const UPDATE_INTERVAL_MS = 50; // in ms
+
 	const ROUND_DURATION_MIN = 30; // in min
 
 	function getTimeRemaining(endtime) {
@@ -40,11 +46,11 @@
 	  };
 	}
 
-	function getClockDivs(clock) {
-	  const total = clock.querySelectorAll('.total');
-		const minutes = clock.querySelectorAll('.minutes.dynamic');
-	  const seconds = clock.querySelectorAll('.seconds.dynamic');
-	  const centiseconds = clock.querySelectorAll('.centiseconds.dynamic');
+	function getClockDivs() {
+	  const total = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${TOTAL_SELECTOR}`);
+		const minutes = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${MINUTES_SELECTOR}`);
+	  const seconds = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${SECONDS_SELECTOR}`);
+	  const centiseconds = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${CENTISECONDS_SELECTOR}`);
 
 	  return {
 	  	total,
@@ -57,28 +63,23 @@
 	/**
 	 * This function can only be called once the page is loaded so the script must be loaded with defer attribute
 	 */
-	function initializeClock(root_class, endtime) {
-		// For debugging purpose we sometimes have many clocks...
-	  const allClocks = document.querySelectorAll(root_class);
-
+	function initializeClock(endtime) {
 	  let timeIntervalID = null; // will be defined later
 
 	  function updateClock() {
 			const remaining = getTimeRemaining(endtime);
 
-			allClocks.forEach(clock => {
-				const divs = getClockDivs(clock);
+			const divs = getClockDivs();
 
-				const minutesStr = remaining.minutes.toString().padStart(2, '0');
-				const secondsStr = remaining.seconds.toString().padStart(2, '0');
-				const centisecondsStr = remaining.centiseconds.toString().padStart(2, '0');
-				const totalStr = remaining.total.toString().padStart(8, '0');
+			const minutesStr = remaining.minutes.toString().padStart(2, '0');
+			const secondsStr = remaining.seconds.toString().padStart(2, '0');
+			const centisecondsStr = remaining.centiseconds.toString().padStart(2, '0');
+			const totalStr = remaining.total.toString().padStart(8, '0');
 
-			  divs.minutes.forEach(div => div.innerHTML = minutesStr);
-			  divs.seconds.forEach(div => div.innerHTML = secondsStr);
-			  divs.centiseconds.forEach(div => div.innerHTML = centisecondsStr);
-				divs.total.forEach(div => div.innerHTML = totalStr);
-		  });
+		  divs.minutes.forEach(div => div.innerHTML = minutesStr);
+		  divs.seconds.forEach(div => div.innerHTML = secondsStr);
+		  divs.centiseconds.forEach(div => div.innerHTML = centisecondsStr);
+			divs.total.forEach(div => div.innerHTML = totalStr);
 
 			// If the countdown is over, we stop the update
 			if (remaining.total <= 0 && timeIntervalID) {
@@ -91,5 +92,5 @@
 	}
 
 	const deadline = new Date(Date.now() + ROUND_DURATION_MIN * SEC_IN_MIN * MS_IN_SEC);
-	initializeClock(ROOT_CLOCK_SELECTOR, deadline);
+	initializeClock(deadline);
 })();
