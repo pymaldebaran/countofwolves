@@ -69,10 +69,15 @@
 			allClocks.forEach(clock => {
 				const divs = getClockDivs(clock);
 
-			  divs.minutes.forEach(div => div.innerHTML = remaining.minutes.toString().padStart(2, '0'));
-			  divs.seconds.forEach(div => div.innerHTML = remaining.seconds.toString().padStart(2, '0'));
-			  divs.centiseconds.forEach(div => div.innerHTML = remaining.centiseconds.toString().padStart(2, '0'));
-				divs.total.forEach(div => div.innerHTML = remaining.total.toString().padStart(8, '0'));
+				const minutesStr = remaining.minutes.toString().padStart(2, '0');
+				const secondsStr = remaining.seconds.toString().padStart(2, '0');
+				const centisecondsStr = remaining.centiseconds.toString().padStart(2, '0');
+				const totalStr = remaining.total.toString().padStart(8, '0');
+
+			  divs.minutes.forEach(div => div.innerHTML = minutesStr);
+			  divs.seconds.forEach(div => div.innerHTML = secondsStr);
+			  divs.centiseconds.forEach(div => div.innerHTML = centisecondsStr);
+				divs.total.forEach(div => div.innerHTML = totalStr);
 		  });
 
 			// If the countdown is over, we stop the update
