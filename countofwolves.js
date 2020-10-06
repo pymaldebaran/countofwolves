@@ -26,7 +26,7 @@
 
 	const UPDATE_INTERVAL_MS = 50; // in ms
 
-	const ROUND_DURATION_MIN = 0.1; // in min
+	const ROUND_DURATION_MIN = 1; // in min
 
 	// Remainig time is represented as an object
 	class TimeRemaining {

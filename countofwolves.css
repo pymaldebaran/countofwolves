@@ -303,3 +303,19 @@ h1{
 	font-size: var(--debug-font-size);
 	grid-area: 1 / 2 / span 1 / span 2;
 }
+
+/* Video stuffs */
+
+/* Inspiration: https://la-cascade.io/video-en-background/ */
+video#fgvid {
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	min-width: 100%;
+	min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: 100;
+  opacity: 0.7;
+  mix-blend-mode: hard-light;
+}
