@@ -26,7 +26,11 @@
 
 	const UPDATE_INTERVAL_MS = 50; // in ms
 
-	const ROUND_DURATION_MIN = 1; // in min
+	// TODO: encapsulate this in an object
+	const ROUND_DURATION_MIN = 30/60; // in min
+	const ACTION_PHASE_DURATION_MIN = 18/60; // in min
+	const TEAM_PHASE_DURATION_MIN = 7/60; // in min
+	// const PRESS_PHASE_DURATION_MIN = 5/60; // in min
 
 	// Remainig time is represented as an object
 	class TimeRemaining {
@@ -76,12 +80,14 @@
 	}
 
 	function getClockDivs() {
+		const clocks = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR}:not(.debug)`);
 	  const ms = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${TOTAL_SELECTOR}`);
 		const minutes = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${MINUTES_SELECTOR}`);
 	  const seconds = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${SECONDS_SELECTOR}`);
 	  const centiseconds = document.querySelectorAll(`${ROOT_CLOCK_SELECTOR} ${CENTISECONDS_SELECTOR}`);
 
 	  return {
+	  	clocks,
 	  	ms,
 	  	minutes,
 	  	seconds,
@@ -101,6 +107,22 @@
 
 			const divs = getClockDivs();
 
+			// Update clocks colors
+			const ROUND_DURATION_MS = ROUND_DURATION_MIN * SEC_IN_MIN * MS_IN_SEC;
+			const ACTION_PHASE_LIMIT_MS = (ROUND_DURATION_MIN - ACTION_PHASE_DURATION_MIN) * SEC_IN_MIN * MS_IN_SEC;
+			const TEAM_PHASE_LIMIT_MS = (ROUND_DURATION_MIN - ACTION_PHASE_DURATION_MIN - TEAM_PHASE_DURATION_MIN) * SEC_IN_MIN * MS_IN_SEC;
+			divs.clocks.forEach(clock => {
+				clock.classList.remove("red", "orange", "green");
+				if (ROUND_DURATION_MS >= remaining.ms && remaining.ms > ACTION_PHASE_LIMIT_MS) {
+					clock.classList.add("green");
+				} else if (ACTION_PHASE_LIMIT_MS >= remaining.ms && remaining.ms > TEAM_PHASE_LIMIT_MS) {
+					clock.classList.add("orange");
+				} else if (TEAM_PHASE_LIMIT_MS >= remaining.ms) {
+					clock.classList.add("red");
+				}
+			});
+
+			// Uddate clocks values
 			const minutesStr = remaining.minutes.toString().padStart(2, '0');
 			const secondsStr = remaining.seconds.toString().padStart(2, '0');
 			const centisecondsStr = remaining.centiseconds.toString().padStart(2, '0');
