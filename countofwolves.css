@@ -10,8 +10,8 @@
  */
 
  @font-face {
-  font-family: "digital-7 (mono)";
-  src: url("fonts/digital-7 (mono).ttf") format("truetype");
+  font-family: "digital-7(mono)";
+  src: url("fonts/digital-7(mono).ttf") format("truetype");
 }
 
 :root{
@@ -48,7 +48,7 @@
 body{
 	text-align: center;
 	background: black;
-	font-family: "digital-7 (mono)";
+	font-family: "digital-7(mono)";
 	font-weight: 100;
 }
 
