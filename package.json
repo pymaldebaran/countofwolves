@@ -1,0 +1,15 @@
+{
+    "type": "module",
+    "scripts": {
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    },
+    "jest": {
+        "testEnvironment": "jest-environment-node",
+        "transform": {}
+    },
+    "devDependencies": {
+        "jest": "^27.3.1",
+        "jshint": "^2.13.1"
+    },
+    "dependencies": {}
+}

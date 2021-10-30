@@ -16,7 +16,7 @@
 	"nonew": true,
 	"regexpu": true,
 	"singleGroups": true,
-	"strict": true,
+	"strict": false,
 	"trailingcomma": true,
 	"undef": true,
 	"unused": "strict",
