@@ -100,8 +100,8 @@ export function ms2day(timeInMs) {
 
 // TODO: encapsulate this in an object
 const ACTION_PHASE_PART = 18 / 30;  // relative to round duration
-const TEAM_PHASE_DURATION_PART = 7 / 30;  // relative to round duration
-// const PRESS_PHASE_DURATION_PART = 5 / 30;  // relative to round duration
+const TEAM_PHASE_DURATION_PART = 6 / 30;  // relative to round duration
+// const PRESS_PHASE_DURATION_PART = 6 / 30;  // relative to round duration
 
 const ROUND_DURATION_MIN = 30; // in min
 const ACTION_PHASE_DURATION_MIN = ROUND_DURATION_MIN * ACTION_PHASE_PART; // in min
@@ -113,9 +113,9 @@ const TEAM_PHASE_DURATION_MIN = ROUND_DURATION_MIN * TEAM_PHASE_DURATION_PART; /
  *
  * @member {number} ms - remaining time till the end in milliseconds
  * @member {?number} lastUpdate - date of the last update in milliseconds, null if never updated
- * @member {bool} paused - whether the timer is in pause or not
+ * @member {?number} paused - date (in ms) since the begining of the pause started (or null if there is no pause at the moment)
  */
-class TimeRemaining {
+export class TimeRemaining {
 	constructor(ms) {
 		this.ms = Math.max(0, ms);
 		this.lastUpdate = null;
@@ -177,6 +177,25 @@ class TimeRemaining {
 
 		this.lastUpdate = now;
 	}
+
+	/**
+	 * Restart the timer with a new total value.
+	 *
+	 * @param newRemaining {number} - new total time in ms to wait
+	 */
+	reset(newRemaining) {
+		this.ms = newRemaining
+	}
+
+	togglePause() {
+		if(this.paused) {
+			const pauseDuration = Date.now() - this.paused
+			this.ms += pauseDuration
+			this.paused = null
+		} else {
+			this.paused = Date.now();
+		}
+	}
 }
 
 /**
@@ -208,60 +227,85 @@ function getClockDivs() {
 }
 
 /**
- * This function can only be called once the page is loaded so the script must be loaded with defer attribute
+ * Get all the divs needed to control the clocks.
  *
- * @param {number} duration - time till the end of the count down to create in milliseconds
+ * @returns {{reset: Element, pause: Element}}
+*/
+function getControlButtons() {
+	return {
+		reset: document.querySelector('.controls #reset'),
+		pause: document.querySelector('.controls #pause'),
+	};
+}
+
+/**
+ * @member {number} timeIntervalID - Reference to the setInterval used to update the clock remaining time
+ * @member {TimeRemaining} remaining Remaining time till the end of the clock
+ * @member {{
+ * 		clocks: NodeListOf<Element>,
+ * 		ms: NodeListOf<Element>,
+ * 		minutes: NodeListOf<Element>,
+ * 		seconds: NodeListOf<Element>,
+ * 		centiseconds: NodeListOf<Element>}} clockDivs - list of usefull divs
  */
-function initializeClock(duration) {
-	let timeIntervalID = null; // will be defined later
-	const remaining = new TimeRemaining(duration);
+class Clock {
+	/**
+	 * @param {number} duration - time till the end of the count down to create in milliseconds
+	 */
+	constructor (duration) {
+		this.remaining = new TimeRemaining(duration);
+		this.clockDivs = getClockDivs();
+		this.controls = getControlButtons();
+
+		// Controls
+		this.controls.reset.onclick = () => { this.remaining.reset(min2ms(ROUND_DURATION_MIN)) };
+		this.controls.pause.onclick = () => { this.remaining.togglePause() };
+
+		// Update the clock now and set a timer to update it regularly
+		this.update();
+		this.timeIntervalID = setInterval(this.update.bind(this), UPDATE_INTERVAL_MS);
+	}
 
 	/**
-	 * A callback to update the clock state
+	 * Update the clock state
 	 */
-	const updateClock = () => {
-		remaining.update();
-
-		const divs = getClockDivs();
+	update() {
+		this.remaining.update();
 
 		const ROUND_DURATION_MS = min2ms(ROUND_DURATION_MIN);
 		const ACTION_PHASE_LIMIT_MS = min2ms(ROUND_DURATION_MIN - ACTION_PHASE_DURATION_MIN);
 		const TEAM_PHASE_LIMIT_MS = min2ms(ROUND_DURATION_MIN - ACTION_PHASE_DURATION_MIN - TEAM_PHASE_DURATION_MIN);
 
 		// Update the color of the clock according to the remaining time
-		divs.clocks.forEach(clock => {
+		this.clockDivs.clocks.forEach(clock => {
 			clock.classList.remove("red", "orange", "green");
-			if (ROUND_DURATION_MS >= remaining.ms && remaining.ms > ACTION_PHASE_LIMIT_MS) {
+			if (ROUND_DURATION_MS >= this.remaining.ms && this.remaining.ms > ACTION_PHASE_LIMIT_MS) {
 				clock.classList.add("green");
-			} else if (ACTION_PHASE_LIMIT_MS >= remaining.ms && remaining.ms > TEAM_PHASE_LIMIT_MS) {
+			} else if (ACTION_PHASE_LIMIT_MS >= this.remaining.ms && this.remaining.ms > TEAM_PHASE_LIMIT_MS) {
 				clock.classList.add("orange");
-			} else if (TEAM_PHASE_LIMIT_MS >= remaining.ms) {
+			} else if (TEAM_PHASE_LIMIT_MS >= this.remaining.ms) {
 				clock.classList.add("red");
 			}
 		});
 
 		// Uddate clocks values
-		const minutesStr = remaining.minutes.toString().padStart(2, '0');
-		const secondsStr = remaining.seconds.toString().padStart(2, '0');
-		const centisecondsStr = remaining.centiseconds.toString().padStart(2, '0');
-		const totalStr = remaining.ms.toString().padStart(8, '0');
+		const minutesStr = this.remaining.minutes.toString().padStart(2, '0');
+		const secondsStr = this.remaining.seconds.toString().padStart(2, '0');
+		const centisecondsStr = this.remaining.centiseconds.toString().padStart(2, '0');
+		const totalStr = this.remaining.ms.toString().padStart(8, '0');
 
-		divs.minutes.forEach(div => div.innerHTML = minutesStr);
-		divs.seconds.forEach(div => div.innerHTML = secondsStr);
-		divs.centiseconds.forEach(div => div.innerHTML = centisecondsStr);
-		divs.ms.forEach(div => div.innerHTML = totalStr);
+		this.clockDivs.minutes.forEach(div => div.innerHTML = minutesStr);
+		this.clockDivs.seconds.forEach(div => div.innerHTML = secondsStr);
+		this.clockDivs.centiseconds.forEach(div => div.innerHTML = centisecondsStr);
+		this.clockDivs.ms.forEach(div => div.innerHTML = totalStr);
 
 		// If the countdown is over, we stop the update
-		if (remaining.ms <= 0 && timeIntervalID) {
-			clearInterval(timeIntervalID);
+		if (this.remaining.ms <= 0 && this.timeIntervalID) {
+			clearInterval(this.timeIntervalID);
 		}
-	};
-
-	// Update the clock now and set a timer to update it regularly
-	updateClock();
-	timeIntervalID = setInterval(updateClock, UPDATE_INTERVAL_MS);
+	}
 }
 
 
 // Code actualy launched
-initializeClock(min2ms(ROUND_DURATION_MIN));
+export const clock = new Clock(min2ms(ROUND_DURATION_MIN));

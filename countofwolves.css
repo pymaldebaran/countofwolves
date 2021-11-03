@@ -43,6 +43,7 @@
 	--neon-green-z3: #aaf8c9;
 	--neon-green-z2: #55f293;
 	--neon-green-z1: #00ec5e;
+	--almost-invisible: rgba(30%, 30%, 30%, 20%);
 }
 
 body{
@@ -313,9 +314,25 @@ video#fgvid {
 	bottom: 0;
 	min-width: 100%;
 	min-height: 100%;
-  width: auto;
-  height: auto;
-  z-index: 100;
-  opacity: 0.7;
-  mix-blend-mode: screen;
+	width: auto;
+	height: auto;
+	z-index: 100;
+	opacity: 0.7;
+	mix-blend-mode: screen;
+}
+
+/* Controls stuffs */
+
+.controls {
+	position: fixed;
+	bottom: 1vh;
+	left: 0;
+	z-index: 200;
+}
+
+.controls button {
+	background-color: var(--almost-invisible);
+	color: black;
+	border-color: var(--almost-invisible);
+	border-width: 0;
 }
