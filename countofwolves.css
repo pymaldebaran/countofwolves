@@ -44,6 +44,7 @@
 	--neon-green-z2: #55f293;
 	--neon-green-z1: #00ec5e;
 	--almost-invisible: rgba(30%, 30%, 30%, 20%);
+	--lcd-green: #396;
 }
 
 body{
@@ -54,7 +55,7 @@ body{
 }
 
 h1{
-	color: #396;
+	color: var(--lcd-green);
 	font-weight: 100;
 	font-size: 40px;
 	margin: 40px 0px 20px;
@@ -319,6 +320,37 @@ video#fgvid {
 	z-index: 100;
 	opacity: 0.7;
 	mix-blend-mode: screen;
+}
+
+/* Captions */
+
+input[type=text]#caption {
+	background-color: transparent;
+	color: white;
+	border-width: 0;
+	text-align: center;
+	font-family:inherit;
+	font-weight:inherit;
+	font-size: 150px;
+	height: 150px;
+}
+
+input[type=text]#caption.green {
+	color: var(--neon-green-z1);
+}
+
+input[type=text]#caption.orange {
+	color: var(--neon-orange-z1);
+}
+
+input[type=text]#caption.red {
+	color: var(--neon-red-z1);
+}
+
+.captions {
+	font-family:inherit;
+	font-weight:inherit;
+	font-size: inherit;
 }
 
 /* Controls stuffs */

@@ -21,6 +21,20 @@ const CENTISECONDS_SELECTOR = '.centiseconds.dynamic';
 
 const UPDATE_INTERVAL_MS = 50; // in ms
 
+// TODO: encapsulate this in an object
+const ACTION_PHASE_PART = 18 / 30;  // relative to round duration
+const TEAM_PHASE_DURATION_PART = 6 / 30;  // relative to round duration
+// const PRESS_PHASE_DURATION_PART = 6 / 30;  // relative to round duration
+
+const ROUND_DURATION_MIN = 30; // in min
+const ACTION_PHASE_DURATION_MIN = ROUND_DURATION_MIN * ACTION_PHASE_PART; // in min
+const TEAM_PHASE_DURATION_MIN = ROUND_DURATION_MIN * TEAM_PHASE_DURATION_PART; // in min
+// const PRESS_PHASE_DURATION_MIN = ROUND_DURATION_MIN * PRESS_PHASE_DURATION_PART; // in min
+
+const ROUND_DURATION_MS = min2ms(ROUND_DURATION_MIN);
+const ACTION_PHASE_LIMIT_MS = min2ms(ROUND_DURATION_MIN - ACTION_PHASE_DURATION_MIN);
+const TEAM_PHASE_LIMIT_MS = min2ms(ROUND_DURATION_MIN - ACTION_PHASE_DURATION_MIN - TEAM_PHASE_DURATION_MIN);
+
 /**
  * Convert a time duration from seconds to minutes.
  *
@@ -97,16 +111,6 @@ export function ms2hour(timeInMs) {
 export function ms2day(timeInMs) {
 	return timeInMs / (MS_IN_SEC * SEC_IN_MIN * MIN_IN_HOUR * HOUR_IN_DAY);
 }
-
-// TODO: encapsulate this in an object
-const ACTION_PHASE_PART = 18 / 30;  // relative to round duration
-const TEAM_PHASE_DURATION_PART = 6 / 30;  // relative to round duration
-// const PRESS_PHASE_DURATION_PART = 6 / 30;  // relative to round duration
-
-const ROUND_DURATION_MIN = 30; // in min
-const ACTION_PHASE_DURATION_MIN = ROUND_DURATION_MIN * ACTION_PHASE_PART; // in min
-const TEAM_PHASE_DURATION_MIN = ROUND_DURATION_MIN * TEAM_PHASE_DURATION_PART; // in min
-// const PRESS_PHASE_DURATION_MIN = ROUND_DURATION_MIN * PRESS_PHASE_DURATION_PART; // in min
 
 /**
  * Remainig time is represented as an object
@@ -187,13 +191,21 @@ export class TimeRemaining {
 		this.ms = newRemaining
 	}
 
-	togglePause() {
-		if(this.paused) {
-			const pauseDuration = Date.now() - this.paused
+	forcePause() {
+		this.paused = Date.now();
+	}
+
+	forceUnpause() {
+		const pauseDuration = Date.now() - this.paused
 			this.ms += pauseDuration
 			this.paused = null
+	}
+
+	togglePause() {
+		if(this.paused) {
+			this.forceUnpause()
 		} else {
-			this.paused = Date.now();
+			this.forcePause();
 		}
 	}
 }
@@ -227,26 +239,58 @@ function getClockDivs() {
 }
 
 /**
+ * Get all the text input needed to display the caption of the current state (or anything else).
+ *
+ * @returns {Element}
+*/
+function getCaption() {
+	return document.getElementById('caption');
+}
+
+/**
  * Get all the divs needed to control the clocks.
  *
- * @returns {{reset: Element, pause: Element}}
+ * @returns {{
+ * 		reset: Element,
+ * 		pause: Element,
+ * 		wolf: Element}}
 */
 function getControlButtons() {
 	return {
 		reset: document.querySelector('.controls #reset'),
 		pause: document.querySelector('.controls #pause'),
+		wolf: document.querySelector('.controls #wolf'),
 	};
 }
 
+class ClockPhase {
+	static ACTION = new ClockPhase({ name: 'action', caption: "Phase d'action", color: 'green',  relativeDuration: 18 / 30 });
+	static TEAM = new ClockPhase({ name: 'team', caption: "Phase d'equipe",   color: 'orange', relativeDuration:  6 / 30 });
+	static PRESS = new ClockPhase({ name: 'press', caption: "Phase de presse",  color: 'red',    relativeDuration:  6 / 30 });
+	static WOLF = new ClockPhase({ name: 'wolf', caption: "ATTAQUE WOLF !!!",  color: 'red',    relativeDuration:  undefined });
+
+	static get values() { return Object.keys(ClockPhase).map(key => ClockPhase[key]); }
+
+	constructor({name, caption, color, relativeDuration}) {
+		this.name = name;
+		this.caption = caption;
+		this.color = color;
+		this.relativeDuration = relativeDuration;
+	}
+}
+
 /**
- * @member {number} timeIntervalID - Reference to the setInterval used to update the clock remaining time
  * @member {TimeRemaining} remaining Remaining time till the end of the clock
+ * @member {bool} wolfAttack wether or not a wolf attack is in progress
  * @member {{
  * 		clocks: NodeListOf<Element>,
  * 		ms: NodeListOf<Element>,
  * 		minutes: NodeListOf<Element>,
  * 		seconds: NodeListOf<Element>,
- * 		centiseconds: NodeListOf<Element>}} clockDivs - list of usefull divs
+ * 		centiseconds: NodeListOf<Element>}} clockDivs - html elements of the counters
+ * @member {Element} caption - HTML text element to display text of the status
+ * @member {{reset: Element, pause: Element}} controls - buttons that control the clock
+ * @member {number} timeIntervalID - Reference to the setInterval used to update the clock remaining time
  */
 class Clock {
 	/**
@@ -254,16 +298,52 @@ class Clock {
 	 */
 	constructor (duration) {
 		this.remaining = new TimeRemaining(duration);
+		this.wolfAttack = false;
 		this.clockDivs = getClockDivs();
+		this.caption = getCaption();
 		this.controls = getControlButtons();
 
 		// Controls
 		this.controls.reset.onclick = () => { this.remaining.reset(min2ms(ROUND_DURATION_MIN)) };
 		this.controls.pause.onclick = () => { this.remaining.togglePause() };
+		this.controls.wolf.onclick = () => { this.toggleWolfAttack() };
 
 		// Update the clock now and set a timer to update it regularly
 		this.update();
 		this.timeIntervalID = setInterval(this.update.bind(this), UPDATE_INTERVAL_MS);
+	}
+
+	/**
+	 * Start or end a wolf attack on the fleet
+	 */
+	toggleWolfAttack() {
+		this.wolfAttack = !this.wolfAttack;
+		if (this.remaining.paused) { this.remaining.forceUnpause(); } // We force the pause to end
+	}
+
+	isInActionPhaseTime() { return ROUND_DURATION_MS >= this.remaining.ms && this.remaining.ms > ACTION_PHASE_LIMIT_MS; }
+	isInTeamPhaseTime() { return ACTION_PHASE_LIMIT_MS >= this.remaining.ms && this.remaining.ms > TEAM_PHASE_LIMIT_MS; }
+	isInPressPhaseTime() { return TEAM_PHASE_LIMIT_MS >= this.remaining.ms; }
+
+	clearClocksStatus() {
+		ClockPhase.values.forEach( phase => {
+			this.clockDivs.clocks.forEach( clock => {
+				clock.classList.remove(phase.color);
+				this.caption.classList.remove(phase.color);
+			})
+		});
+
+	}
+
+	/**
+	 * Change the apparearence according to the phase
+	 *
+	 * @param {ClockPhase} phase - phase to set
+	 */
+	setPhaseStatus(phase) {
+		this.caption.value = phase.caption
+		this.caption.classList.add(phase.color);
+		this.clockDivs.clocks.forEach(clock => { clock.classList.add(phase.color); });
 	}
 
 	/**
@@ -272,21 +352,33 @@ class Clock {
 	update() {
 		this.remaining.update();
 
-		const ROUND_DURATION_MS = min2ms(ROUND_DURATION_MIN);
-		const ACTION_PHASE_LIMIT_MS = min2ms(ROUND_DURATION_MIN - ACTION_PHASE_DURATION_MIN);
-		const TEAM_PHASE_LIMIT_MS = min2ms(ROUND_DURATION_MIN - ACTION_PHASE_DURATION_MIN - TEAM_PHASE_DURATION_MIN);
+		// Update clock's status according to the remaining time
+		this.clearClocksStatus();
 
-		// Update the color of the clock according to the remaining time
-		this.clockDivs.clocks.forEach(clock => {
-			clock.classList.remove("red", "orange", "green");
-			if (ROUND_DURATION_MS >= this.remaining.ms && this.remaining.ms > ACTION_PHASE_LIMIT_MS) {
-				clock.classList.add("green");
-			} else if (ACTION_PHASE_LIMIT_MS >= this.remaining.ms && this.remaining.ms > TEAM_PHASE_LIMIT_MS) {
-				clock.classList.add("orange");
-			} else if (TEAM_PHASE_LIMIT_MS >= this.remaining.ms) {
-				clock.classList.add("red");
+		if (this.isInActionPhaseTime()) {
+			if (this.wolfAttack) {
+				// we do not pause the action phase !!!
+				this.setPhaseStatus(ClockPhase.WOLF);
+			} else {
+				this.setPhaseStatus(ClockPhase.ACTION);
 			}
-		});
+		}
+		else if (this.isInTeamPhaseTime()) {
+			if (this.wolfAttack) {
+				if (!this.remaining.paused) { this.remaining.forcePause(); }
+				this.setPhaseStatus(ClockPhase.WOLF);
+			} else {
+				this.setPhaseStatus(ClockPhase.TEAM);
+			}
+		}
+		else if (this.isInPressPhaseTime()) {
+			if (this.wolfAttack) {
+				if (!this.remaining.paused) { this.remaining.forcePause(); }
+				this.setPhaseStatus(ClockPhase.WOLF);
+			} else {
+				this.setPhaseStatus(ClockPhase.PRESS);
+			}
+		}
 
 		// Uddate clocks values
 		const minutesStr = this.remaining.minutes.toString().padStart(2, '0');
@@ -301,7 +393,8 @@ class Clock {
 
 		// If the countdown is over, we stop the update
 		if (this.remaining.ms <= 0 && this.timeIntervalID) {
-			clearInterval(this.timeIntervalID);
+			// clearInterval(this.timeIntervalID);
+			this.remaining.reset(min2ms(ROUND_DURATION_MIN))
 		}
 	}
 }

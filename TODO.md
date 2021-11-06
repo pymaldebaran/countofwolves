@@ -4,7 +4,7 @@
 
 - [x] Boutton restart
 - [x] Bouton toggle pause
-- [ ] Bouton toggle pause Wolf -> fait pause la fin de la phase d'action automatiquement
+- [x] Bouton toggle pause Wolf -> fait pause la fin de la phase d'action automatiquement
 - [ ] Champ editable de temps
 - [ ] Champ libre éditable de test en bas (à la place du "total actuel")
 - [ ] bouton de lancement de la tempête
@@ -16,7 +16,7 @@
 
 ## Optionel
 
-- [ ] Bouton pour déclencher attack WOLF
+- [x] Bouton pour déclencher attack WOLF
 - [x] Calculer le vert/orange/rouge à partir du temps donné à la main d'une manche
 
 ## Canceled
